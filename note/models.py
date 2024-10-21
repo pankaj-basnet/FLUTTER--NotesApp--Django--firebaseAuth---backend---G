@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 # .......................................................
 
@@ -17,6 +18,17 @@ class Note(models.Model):
     user_id = models.ForeignKey(User, related_name='notes', on_delete=models.CASCADE)
     text = models.TextField()
     is_synced_with_cloud = models.BooleanField()
+
+    #
+    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(default = timezone.now) #  migrations done 141021
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # def __repr__(self) -> str:
+    #     return f'Note: {self.text} ooo.'
+
+    def __str__(self) -> str:
+        return f"Note: {self.text[:15]} {self.created_at} ooo."
 
     
 # .......................................................

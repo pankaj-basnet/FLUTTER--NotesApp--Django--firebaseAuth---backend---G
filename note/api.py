@@ -42,19 +42,27 @@ class NoteListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(text=text)
         # send a Django signal
 
-    # def get_queryset(self):
+    def get_queryset(self):
 
-    #     queryset = Note.objects.all()[1:3]
-    #     return queryset
+        # queryset = Note.objects.all()[:4] # five notes on top in django database
+        queryset = Note.objects.all().filter().order_by('updated_at' )
+        return queryset
 
 note_list_create_view = NoteListCreateAPIView.as_view()
+
+
+######################################################
 
 class NoteDetailAPIView(generics.RetrieveAPIView):
     queryset = Note.objects.all()
     serializer_class = NotesListSerializer
 
+
 note_detail_view = NoteDetailAPIView.as_view()
 
+
+
+######################################################
 
 class NoteUpdateAPIView(generics.UpdateAPIView):
     queryset = Note.objects.all()
@@ -70,6 +78,7 @@ class NoteUpdateAPIView(generics.UpdateAPIView):
 note_update_view = NoteUpdateAPIView.as_view()
 
 
+
 class NoteDestroyAPIView(generics.DestroyAPIView):
     queryset = Note.objects.all()
     serializer_class = NotesListSerializer
@@ -80,3 +89,32 @@ class NoteDestroyAPIView(generics.DestroyAPIView):
         super().perform_destroy(instance)
 
 note_destroy_view = NoteDestroyAPIView.as_view()
+
+
+##############################################################
+
+
+class NotePinnedAPIView(generics.ListCreateAPIView):
+    queryset = Note.objects.all()
+    
+    serializer_class = NotesListSerializer
+
+    def perform_create(self, serializer):
+        # serializer.save(user=self.request.user)
+        user_id = serializer.validated_data.get('user_id')
+        text = serializer.validated_data.get('text') or None
+        is_synced_with_cloud = serializer.validated_data.get('is_synced_with_cloud')
+        if text is None:
+            text = user_id
+        serializer.save(text=text)
+        # send a Django signal
+
+    def get_queryset(self):
+
+        # queryset = Note.objects.all()[4:] #didnot work
+        # queryset = Note.objects.all() # five notes on top in django database
+        queryset = Note.objects.filter(text__icontains = 'pin')
+
+        return queryset
+
+note_pinned_view = NotePinnedAPIView.as_view()
